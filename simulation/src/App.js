@@ -65,12 +65,16 @@ function App() {
           Math.abs(obstacle.y - clampedY) === 0
         );
         
-        if (hitObstacle) {
-          console.log('Collision avec un obstacle!');
+        const hitBoule = boules.some(boule =>
+          Math.abs(boule.x - clampedX) === 0 &&
+          Math.abs(boule.y - clampedY) === 0
+        );
+  
+        if (hitObstacle || hitBoule) {
+          console.log('Collision!');
           setShowCrashPopup(true);
           return; // Prevent further execution to simulate the stop or destruction
         }
-
         setPosition({
           x: clampedX,
           y: clampedY,
@@ -80,39 +84,29 @@ function App() {
       }
     };
     window.addEventListener('keydown', handleKeyPress);
-    const fetchBoulesPosition = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/voiture/boules');
-        const boulesData = await response.json();
-        console.log('Positions des boules récupérées:', boulesData); // Log pour voir les données récupérées
-        setBoules(boulesData);
-        console.log('Nouvelles positions des boules:', boules);
-        console.log('boules', JSON.stringify(boules));
-        console.log('position', JSON.stringify(position));
-
-        const hitBoule = boules.some(boule =>
-          Math.abs(boule.x - position.x) === 0 &&
-          Math.abs(boule.y - position.y) === 0
-        );
-        
-        if (hitBoule) {
-          console.log('Collision avec une boule!');
-          setShowCrashPopup(true);
-          return; // Prevent further execution to simulate the stop or destruction
-        }
-    
-      } catch (error) {
-        console.error('Erreur lors de la récupération des positions des boules:', error);
-      }
-    };
-  
-    const intervalId = setInterval(fetchBoulesPosition, 1000);
-
 
       return () => window.removeEventListener('keydown', handleKeyPress); 
-      clearInterval(intervalId);
-    }, []);
+    }, [boules]);
 
+    useEffect(() => {  
+   
+      const fetchBoulesPosition = async () => {
+        try {
+          const response = await fetch('http://localhost:8080/voiture/boules');
+          const boulesData = await response.json();
+          setBoules(boulesData);
+      
+        } catch (error) {
+          console.error('Erreur lors de la récupération des positions des boules:', error);
+        }
+      };
+    
+      const intervalId = setInterval(fetchBoulesPosition, 1000);
+  
+  
+        return () =>
+        clearInterval(intervalId);
+      }, []);
     
 
   const startGame = () => {
@@ -136,6 +130,7 @@ function App() {
     });
   };
 
+  
   const handleCrash = () => {
     setShowCrashPopup(true); // Affiche le popup de crash
     // Autres logiques en cas de crash
