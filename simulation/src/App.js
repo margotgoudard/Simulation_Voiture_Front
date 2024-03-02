@@ -15,8 +15,7 @@ function App() {
   const [stations, setStations] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }]);
   const [obstacles, setObstacles] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}]); 
   const [boules, setBoules] = useState([
-    { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)), suivre: false }, // Boule 1
-    { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)), suivre: false }  // Boule 2
+    { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, // Boule 1
   ]);
 
   const [showStartPopup, setShowStartPopup] = useState(true); // État pour le popup de démarrage
@@ -24,8 +23,6 @@ function App() {
 
 
   
-  
-
   
 
   useEffect(() => {
@@ -82,6 +79,8 @@ function App() {
           return; // Prevent further execution to simulate the stop or destruction
         }
 
+
+
         setPosition({
           x: clampedX,
           y: clampedY,
@@ -90,13 +89,36 @@ function App() {
         });
       }
     };
-
-
-
-
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [squareSize, stations]);
+    const fetchBoulesPosition = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/voiture/boules');
+        const boulesData = await response.json();
+        console.log('Positions des boules récupérées:', boulesData); // Log pour voir les données récupérées
+        setBoules(boulesData);
+        console.log('Nouvelles positions des boules:', boules); // Log pour voir les données récupérées
+    
+      } catch (error) {
+        console.error('Erreur lors de la récupération des positions des boules:', error);
+      }
+    };
+  
+    const intervalId = setInterval(fetchBoulesPosition, 1000);
+
+    // Check for collision with boules
+    const hitBoule = boules.some(boule =>
+      Math.abs(boule.x - position.x) === 0 &&
+      Math.abs(boule.y - position.y) === 0
+    );
+    
+    if (hitBoule) {
+      console.log('Collision avec une boule!');
+      setShowCrashPopup(true);
+      return; // Prevent further execution to simulate the stop or destruction
+    }
+      return () => window.removeEventListener('keydown', handleKeyPress); 
+      clearInterval(intervalId);
+    }, [position]);
 
   const startGame = () => {
     setShowStartPopup(false); // Cache le popup de démarrage
@@ -203,10 +225,10 @@ function App() {
         <div style={containerStyle}>
           <div style={squareStyle}>
           {boules.map((boule, index) =>  (
-        <div key={`boule-${index}`} style={{ position: 'absolute', top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}>
-          🟠
-        </div>
-      ))}
+              <div key={`boule-${index}`} style={{ position: 'absolute', top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}>
+                🟠
+              </div>
+            ))}
             {obstacles.map((obstacle, index) => (
               <div key={`obstacle-${index}`} style={{ position: 'absolute', top: `${obstacle.y * 10}px`, left: `${obstacle.x * 10}px` }}>🏠</div>
             ))}
