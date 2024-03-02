@@ -14,14 +14,16 @@ function App() {
   const [position, setPosition] = useState({ carburant: 60 });
   const [stations, setStations] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }]);
   const [obstacles, setObstacles] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}]); 
+  const [boules, setBoules] = useState([
+    { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)), suivre: false }, // Boule 1
+    { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)), suivre: false }  // Boule 2
+  ]);
 
   const [showStartPopup, setShowStartPopup] = useState(true); // État pour le popup de démarrage
   const [showCrashPopup, setShowCrashPopup] = useState(false); 
 
-  const [voitures, setVoitures] = useState([
-    { id: 1, positionX: 5, positionY: 5, couleur: 'red', direction: 'd', carburant: 60, estDetruite: false },
-    { id: 2, positionX: 10, positionY: 10, couleur: 'blue', direction: 'g', carburant: 60, estDetruite: false }
-  ]);
+
+  
   
 
   
@@ -88,6 +90,9 @@ function App() {
         });
       }
     };
+
+
+
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
@@ -197,13 +202,11 @@ function App() {
       {!showStartPopup && !showCrashPopup && (
         <div style={containerStyle}>
           <div style={squareStyle}>
-          {voitures.map((voiture, index) => (
-            !voiture.estDetruite && (
-             <div key={index} style={{ ...voitureStyle, top: `${voiture.positionY * 10}px`, left: `${voiture.positionX * 10}px`, backgroundColor: voiture.couleur }}>
-              🚗
-            </div>
-            )
-          ))}
+          {boules.map((boule, index) =>  (
+        <div key={`boule-${index}`} style={{ position: 'absolute', top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}>
+          🟠
+        </div>
+      ))}
             {obstacles.map((obstacle, index) => (
               <div key={`obstacle-${index}`} style={{ position: 'absolute', top: `${obstacle.y * 10}px`, left: `${obstacle.x * 10}px` }}>🏠</div>
             ))}
