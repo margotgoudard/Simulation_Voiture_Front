@@ -10,8 +10,10 @@ function App() {
   const squareSize = 50;
   const squareEdge = Math.min(window.innerWidth, window.innerHeight) * (squareSize / 100);
 
+  const centerX = squareEdge / 2 / 10;
+    const centerY = squareEdge / 2 / 10;
 
-  const [position, setPosition] = useState({ carburant: 60 });
+  const [position, setPosition] = useState({ x: centerX, y: centerY, carburant: 60 });
   const [stations, setStations] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }]);
   const [obstacles, setObstacles] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}]); 
   const [boules, setBoules] = useState([
@@ -28,16 +30,6 @@ function App() {
   useEffect(() => {
 
     const squareEdgeInPositions = squareEdge / 10; // Convertir en unités de position
-
-    const centerX = squareEdge / 2 / 10;
-    const centerY = squareEdge / 2 / 10;
-
-    setPosition({
-      x: centerX,
-      y: centerY,
-      direction: 'd',
-      carburant: 60
-    });
 
     const handleKeyPress = async (event) => {
       const keyMap = { ArrowUp: 'h', ArrowDown: 'b', ArrowLeft: 'g', ArrowRight: 'd' };
@@ -79,8 +71,6 @@ function App() {
           return; // Prevent further execution to simulate the stop or destruction
         }
 
-
-
         setPosition({
           x: clampedX,
           y: clampedY,
@@ -96,7 +86,20 @@ function App() {
         const boulesData = await response.json();
         console.log('Positions des boules récupérées:', boulesData); // Log pour voir les données récupérées
         setBoules(boulesData);
-        console.log('Nouvelles positions des boules:', boules); // Log pour voir les données récupérées
+        console.log('Nouvelles positions des boules:', boules);
+        console.log('boules', JSON.stringify(boules));
+        console.log('position', JSON.stringify(position));
+
+        const hitBoule = boules.some(boule =>
+          Math.abs(boule.x - position.x) === 0 &&
+          Math.abs(boule.y - position.y) === 0
+        );
+        
+        if (hitBoule) {
+          console.log('Collision avec une boule!');
+          setShowCrashPopup(true);
+          return; // Prevent further execution to simulate the stop or destruction
+        }
     
       } catch (error) {
         console.error('Erreur lors de la récupération des positions des boules:', error);
@@ -105,20 +108,12 @@ function App() {
   
     const intervalId = setInterval(fetchBoulesPosition, 1000);
 
-    // Check for collision with boules
-    const hitBoule = boules.some(boule =>
-      Math.abs(boule.x - position.x) === 0 &&
-      Math.abs(boule.y - position.y) === 0
-    );
-    
-    if (hitBoule) {
-      console.log('Collision avec une boule!');
-      setShowCrashPopup(true);
-      return; // Prevent further execution to simulate the stop or destruction
-    }
+
       return () => window.removeEventListener('keydown', handleKeyPress); 
       clearInterval(intervalId);
-    }, [position]);
+    }, []);
+
+    
 
   const startGame = () => {
     setShowStartPopup(false); // Cache le popup de démarrage
