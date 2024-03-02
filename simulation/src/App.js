@@ -1,4 +1,35 @@
 import React, { useEffect, useState } from 'react';
+import backgroundImage from './fond.png';
+import voitureImage from './voiture.png';
+
+
+function FuelBar({ carburant }) {
+  // Calculez la largeur de la barre de carburant en pourcentage
+  const fuelWidth = `${(carburant / 60) * 100}%`;
+
+  // Style pour le conteneur de la barre de carburant
+  const fuelBarContainerStyle = {
+    width: '300px', // ou la largeur que vous souhaitez
+    height: '30px', // ou la hauteur que vous souhaitez
+    backgroundColor: 'grey', // Couleur de fond pour la partie non remplie
+    borderRadius: '15px', // Rayon pour les coins arrondis
+    overflow: 'hidden',
+  };
+
+  // Style pour la barre de carburant remplie
+  const fuelBarFillStyle = {
+    width: fuelWidth,
+    height: '100%',
+    backgroundColor: 'orange', // Couleur de remplissage pour le carburant
+    transition: 'width 0.5s ease-in-out', // Transition pour animer le changement de carburant
+  };
+
+  return (
+    <div style={fuelBarContainerStyle}>
+      <div style={fuelBarFillStyle}></div>
+    </div>
+  );
+}
 
 function App() {
 
@@ -131,33 +162,28 @@ function App() {
   };
 
   
-  const handleCrash = () => {
-    setShowCrashPopup(true); // Affiche le popup de crash
-    // Autres logiques en cas de crash
-  };
 
   const containerStyle = {
+
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
   };
 
   const squareStyle = {
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundSize: '100% 100%',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
     position: 'relative',
-    width: `${squareSize}vw`,
+    width: `35vw`,
     height: `${squareSize}vh`,
-    border: '3px solid black',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#f0f0f0', // Couleur de fond douce
-      border: '2px solid #ddd', // Bordure fine
-      borderRadius: '10px', // Coins arrondis
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Ombre légère
+    
       transition: 'transform 0.3s ease', // Transition pour l'animation
     
       // Animation : légère augmentation de taille au survol
@@ -183,19 +209,19 @@ function App() {
   };
 
   const voitureStyle = {
+    backgroundImage: `url(${voitureImage})`,// Chemin de votre image
+   backgroundSize: '50% 50%', // Couvrir l'ensemble de la div
+   backgroundRepeat: 'no-repeat',
+
+    backgroundPosition: 'center', // Centrer l'image dans la div
+    width: '50px', // Ajustez selon la taille de votre image
+  height: '50px',
     position: 'absolute',
     top: `${position.y * 10}px`,
     left: `${position.x * 10}px`,
     transition: 'all 0.5s ease',
   };
 
-  const carburantStyle = {
-    position: 'absolute',
-    top: '10px',
-    right: '10px',
-    fontSize: '20px',
-    fontWeight: 'bold',
-  };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -213,8 +239,9 @@ function App() {
 
       {!showStartPopup && !showCrashPopup && (
         <div style={containerStyle}>
+          <FuelBar carburant={position.carburant} />
           <div style={squareStyle}>
-          {boules.map((boule, index) =>  (
+            {boules.map((boule, index) => (
               <div key={`boule-${index}`} style={{ position: 'absolute', top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}>
                 🟠
               </div>
@@ -225,8 +252,7 @@ function App() {
             {stations.map((station, index) => (
               <div key={index} style={{ position: 'absolute', top: `${station.y * 10}px`, left: `${station.x * 10}px` }}>⛽</div>
             ))}
-            <div style={voitureStyle}>🚗</div>
-            <div style={carburantStyle}>Carburant: {position.carburant}</div>
+            <div style={voitureStyle}></div>
           </div>
         </div>
       )}
