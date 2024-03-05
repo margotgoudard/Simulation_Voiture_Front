@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import backgroundImage from './fond.png';
 import voitureImage from './voiture.png';
+import stationImage from './station.png';
+import obstaclesImage from './obstacles.png';
+import boulesImage from './boules.png';
+
 
 
 function FuelBar({ carburant }) {
@@ -15,6 +19,7 @@ function FuelBar({ carburant }) {
     borderRadius: '15px', // Rayon pour les coins arrondis
     overflow: 'hidden',
   };
+
 
   // Style pour la barre de carburant remplie
   const fuelBarFillStyle = {
@@ -31,12 +36,27 @@ function FuelBar({ carburant }) {
   );
 }
 
+const getRotationAngle = (direction) => {
+  switch (direction) {
+    case 'h': return '180deg'; // Haut
+    case 'b': return '0deg'; // Bas
+    case 'g': return '90deg'; // Gauche
+    case 'd': return '-90deg'; // Droite
+    default: return '0deg';
+  }
+};
+
+
 function App() {
+
+  const [crashMessage, setCrashMessage] = useState('');
 
   function generateRandomNumber(maxX) {
     const x = Math.floor(Math.random() * maxX);
     return x;
   }
+
+  
 
   const squareSize = 50;
   const squareEdge = Math.min(window.innerWidth, window.innerHeight) * (squareSize / 100);
@@ -45,7 +65,7 @@ function App() {
     const centerY = squareEdge / 2 / 10;
 
   const [position, setPosition] = useState({ x: centerX, y: centerY, carburant: 60 });
-  const [stations, setStations] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }]);
+  const [stations, setStations] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }]);
   const [obstacles, setObstacles] = useState([{ x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10))}]); 
   const [boules, setBoules] = useState([
     { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, // Boule 1
@@ -53,9 +73,6 @@ function App() {
 
   const [showStartPopup, setShowStartPopup] = useState(true); // État pour le popup de démarrage
   const [showCrashPopup, setShowCrashPopup] = useState(false); 
-
-
-  
   
 
   useEffect(() => {
@@ -101,11 +118,27 @@ function App() {
           Math.abs(boule.y - clampedY) === 0
         );
   
-        if (hitObstacle || hitBoule) {
-          console.log('Collision!');
-          setShowCrashPopup(true);
-          return; // Prevent further execution to simulate the stop or destruction
-        }
+        if (hitObstacle) {
+      console.log('Collision avec un obstacle!');
+      setCrashMessage('Vous êtes rentré dans un obstacle!');
+      setShowCrashPopup(true);
+      return; // Arrêtez la fonction ici pour éviter de définir la position après un crash
+    }
+
+    if (hitBoule) {
+      console.log('Écrasé par une boule!');
+      setCrashMessage('Vous vous êtes fait écraser!');
+      setShowCrashPopup(true);
+      return; // Arrêtez la fonction ici pour éviter de définir la position après un crash
+    }
+
+    if (newPosition.carburant <= 0) {
+      console.log('Plus d\'essence!');
+      setCrashMessage('Vous n\'avez plus d\'essence!');
+      setShowCrashPopup(true);
+      return; // Arrêtez la fonction ici pour éviter de définir la position après un crash
+    }
+
         setPosition({
           x: clampedX,
           y: clampedY,
@@ -117,52 +150,73 @@ function App() {
     window.addEventListener('keydown', handleKeyPress);
 
       return () => window.removeEventListener('keydown', handleKeyPress); 
-    }, [boules]);
+    }, [boules, obstacles]);
 
-    useEffect(() => {  
-   
-      const fetchBoulesPosition = async () => {
-        try {
-          const response = await fetch('http://localhost:8080/voiture/boules');
-          const boulesData = await response.json();
-          setBoules(boulesData);
-      
-        } catch (error) {
-          console.error('Erreur lors de la récupération des positions des boules:', error);
-        }
+    useEffect(() => {
+      const eventSource = new EventSource("http://localhost:8080/voiture");
+    
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Data received from server:", data);
+        // Mise à jour de l'état avec les nouvelles données
+        setPosition({
+          x: data.positionX,
+          y: data.positionY,
+          carburant: data.carburant,
+          direction: data.direction
+        });
+        setBoules(data.boules);
+        // Ajoutez ici la logique pour mettre à jour les autres états comme les stations ou obstacles si elles sont envoyées par le serveur
       };
     
-      const intervalId = setInterval(fetchBoulesPosition, 1000);
-  
-  
-        return () =>
-        clearInterval(intervalId);
-      }, []);
+      return () => {
+        eventSource.close();
+      };
+    }, []);
     
 
   const startGame = () => {
     setShowStartPopup(false); // Cache le popup de démarrage
   };
 
-  const restartGame = () => {
+  const restartGame = async () => {
     setShowCrashPopup(false); // Cache le popup de crash
+
+    try {
+      await fetch('http://localhost:8080/voiture/reinitialiser', { method: 'POST' });
+    } catch (error) {
+      console.error('Erreur lors de la réinitialisation du jeu:', error);
+    }
   
-    // Calculer le centre du carré de jeu
-    const squareEdge = Math.min(window.innerWidth, window.innerHeight) * (squareSize / 100);
-    const centerX = squareEdge / 2 / 10; // Diviser par 10 pour convertir en unités de position
-    const centerY = squareEdge / 2 / 10;
-  
-    // Réinitialiser la position de la voiture et son carburant
+    // Réinitialiser les positions de départ et le carburant
     setPosition({
       x: centerX,
       y: centerY,
-      direction: 'd', // Vous pouvez choisir la direction initiale qui vous convient
+      direction: 'd',
       carburant: 60
     });
+  
+    // Réinitialiser les positions des stations
+    setStations([...Array(4)].map(() => ({
+      x: generateRandomNumber(Math.floor(squareEdge / 10)),
+      y: generateRandomNumber(Math.floor(squareEdge / 10))
+    })));
+  
+    // Réinitialiser les positions des obstacles
+    setObstacles([...Array(10)].map(() => ({
+      x: generateRandomNumber(Math.floor(squareEdge / 10)),
+      y: generateRandomNumber(Math.floor(squareEdge / 10))
+    })));
+  
+    // Réinitialiser les positions des boules
+    setBoules([...Array(2)].map(() => ({ // Supposons que vous avez 2 boules, ajustez selon le nombre réel
+      x: generateRandomNumber(Math.floor(squareEdge / 10)),
+      y: generateRandomNumber(Math.floor(squareEdge / 10))
+    })));
   };
-
   
 
+  
   const containerStyle = {
 
     display: 'flex',
@@ -184,14 +238,12 @@ function App() {
     justifyContent: 'center',
     alignItems: 'center',
     
-      transition: 'transform 0.3s ease', // Transition pour l'animation
+      transition: 'transform 0.3s ease', 
     
-      // Animation : légère augmentation de taille au survol
       ':hover': {
         transform: 'scale(1.02)',
       },
     
-      // Utilisez @keyframes pour une animation subtile de fond ou d'ombre
       '@keyframes pulse': {
         '0%': {
           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
@@ -209,19 +261,52 @@ function App() {
   };
 
   const voitureStyle = {
-    backgroundImage: `url(${voitureImage})`,// Chemin de votre image
+  backgroundImage: `url(${voitureImage})`,// Chemin de votre image
    backgroundSize: '50% 50%', // Couvrir l'ensemble de la div
    backgroundRepeat: 'no-repeat',
 
     backgroundPosition: 'center', // Centrer l'image dans la div
     width: '50px', // Ajustez selon la taille de votre image
-  height: '50px',
+    height: '50px',
     position: 'absolute',
     top: `${position.y * 10}px`,
     left: `${position.x * 10}px`,
     transition: 'all 0.5s ease',
+    transform: `rotate(${getRotationAngle(position.direction)})`
   };
 
+  const stationStyle = {
+    backgroundImage: `url(${stationImage})`, // Utilisez l'image de station importée
+    backgroundSize: 'contain', // Cela assure que l'image s'adapte à la taille de la div sans être déformée
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    width: '30px', // Définissez la taille que vous souhaitez pour les images de station
+    height: '30px',
+    position: 'absolute',
+    transition: 'all 0.5s ease',
+  };
+
+  const obstacleStyle = {
+    backgroundImage: `url(${obstaclesImage})`, // Utilisez l'image de station importée
+    backgroundSize: 'contain', // Cela assure que l'image s'adapte à la taille de la div sans être déformée
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    width: '30px', // Définissez la taille que vous souhaitez pour les images de station
+    height: '30px',
+    position: 'absolute',
+    transition: 'all 0.5s ease',
+  };
+
+  const bouleStyle = {
+    backgroundImage: `url(${boulesImage})`, // Utilisez l'image de station importée
+    backgroundSize: 'contain', // Cela assure que l'image s'adapte à la taille de la div sans être déformée
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    width: '30px', // Définissez la taille que vous souhaitez pour les images de station
+    height: '30px',
+    position: 'absolute',
+    transition: 'all 0.5s ease',
+  };
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -231,8 +316,9 @@ function App() {
         </div>
       )}
 
-      {showCrashPopup && (
+    {showCrashPopup && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
+          <p>{crashMessage}</p> {/* Ajouté pour afficher le message de crash */}
           <button onClick={restartGame}>Recommencer</button>
         </div>
       )}
@@ -242,15 +328,13 @@ function App() {
           <FuelBar carburant={position.carburant} />
           <div style={squareStyle}>
             {boules.map((boule, index) => (
-              <div key={`boule-${index}`} style={{ position: 'absolute', top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}>
-                🟠
-              </div>
+              <div key={`boule-${index}`} style={{ ...bouleStyle, top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}></div>
             ))}
             {obstacles.map((obstacle, index) => (
-              <div key={`obstacle-${index}`} style={{ position: 'absolute', top: `${obstacle.y * 10}px`, left: `${obstacle.x * 10}px` }}>🏠</div>
+            <div key={index} style={{...obstacleStyle, top: `${obstacle.y * 10}px`, left: `${obstacle.x * 10}px` }}></div>
             ))}
             {stations.map((station, index) => (
-              <div key={index} style={{ position: 'absolute', top: `${station.y * 10}px`, left: `${station.x * 10}px` }}>⛽</div>
+            <div key={index} style={{...stationStyle, top: `${station.y * 10}px`, left: `${station.x * 10}px` }}></div>
             ))}
             <div style={voitureStyle}></div>
           </div>
