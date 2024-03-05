@@ -333,7 +333,7 @@ function App() {
             {stations.map((station, index) => (
             <div key={index} style={{...stationStyle, top: `${station.y * 10}px`, left: `${station.x * 10}px` }}></div>
             ))}
-            <div style={voitureStyle}></div>
+            <div style={voitureStyle} data-testid="voiture"></div>
           </div>
         </div>
       )}

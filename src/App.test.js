@@ -1,10 +1,13 @@
 // Import React and testing utilities
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import components and functions from your application
 import App, { FuelBar, generateRandomNumber, getRotationAngle } from './App';
+
+// TEST UNITAIRES 
+
 
 // Mock EventSource globally before any test runs
 beforeAll(() => {
@@ -14,6 +17,8 @@ beforeAll(() => {
     close: jest.fn(),
   }));
 });
+
+
 
 // Describe block for the FuelBar component tests
 describe('FuelBar Component', () => {
@@ -73,3 +78,6 @@ test('generateRandomNumber returns a number within the expected range', () => {
     expect(number).toBeLessThan(max);
   }
 });
+
+// TESTS UI
+

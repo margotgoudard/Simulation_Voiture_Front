@@ -1,70 +1,29 @@
-# Getting Started with Create React App
+# README - Jeu de Voiture React
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Ce projet est une application React qui simule un jeu de voiture avec un backend indépendant. Dans ce jeu, le joueur contrôle une voiture, évite des obstacles, collecte du carburant, et essaie de ne pas se faire écraser par des boules qui tombent du ciel. Le jeu comprend une interface visuelle pour voir la voiture, les stations de carburant, les obstacles, et les boules, ainsi qu'une barre de carburant qui diminue progressivement au fil du temps.
 
-## Available Scripts
+## Fonctionnalités
 
-In the project directory, you can run:
+Contrôle de la Voiture: Utilisez les flèches du clavier pour déplacer la voiture dans les directions haut, bas, gauche, et droite.
+Stations de Carburant: Rechargez votre carburant en passant à côté des stations.
+Obstacles: Évitez les obstacles qui peuvent causer un crash.
+Boules: Évitez les boules tombant du ciel qui peuvent également causer un crash.
+Barre de Carburant: Gardez un œil sur votre niveau de carburant qui diminue au fur et à mesure que vous vous déplacez.
+Début et Redémarrage du Jeu: Commencez à jouer ou redémarrez le jeu après un crash.
 
-### `npm start`
+## Technologies Utilisées
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+React: Pour construire l'interface utilisateur du jeu.
+CSS: Pour styliser l'application.
+APIs et Fetch: Pour communiquer avec le backend afin de gérer les déplacements, le carburant, et les collisions.
+Server-Sent Events (SSE): Pour recevoir les mises à jour en temps réel du serveur concernant la position de la voiture, le niveau de carburant, et la position des boules.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Démarrer le projet 
 
-### `npm test`
+npm install
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Build le projet 
 
-### `npm run build`
+npm build
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
