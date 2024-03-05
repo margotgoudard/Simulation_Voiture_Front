@@ -7,7 +7,7 @@ import boulesImage from './boules.png';
 
 
 
-function FuelBar({ carburant }) {
+export function FuelBar({ carburant }) {
   // Calculez la largeur de la barre de carburant en pourcentage
   const fuelWidth = `${(carburant / 60) * 100}%`;
 
@@ -30,13 +30,13 @@ function FuelBar({ carburant }) {
   };
 
   return (
-    <div style={fuelBarContainerStyle}>
-      <div style={fuelBarFillStyle}></div>
+    <div style={fuelBarContainerStyle} data-testid="fuel-bar-container">
+      <div style={fuelBarFillStyle} data-testid="fuel-bar-fill"></div>
     </div>
   );
 }
 
-const getRotationAngle = (direction) => {
+export const getRotationAngle = (direction) => {
   switch (direction) {
     case 'h': return '180deg'; // Haut
     case 'b': return '0deg'; // Bas
@@ -46,16 +46,15 @@ const getRotationAngle = (direction) => {
   }
 };
 
+export function generateRandomNumber(maxX) {
+  const x = Math.floor(Math.random() * maxX);
+  return x;
+}
+
 
 function App() {
 
   const [crashMessage, setCrashMessage] = useState('');
-
-  function generateRandomNumber(maxX) {
-    const x = Math.floor(Math.random() * maxX);
-    return x;
-  }
-
   
 
   const squareSize = 50;
@@ -323,7 +322,7 @@ function App() {
 
       {!showStartPopup && !showCrashPopup && (
         <div style={containerStyle}>
-          <FuelBar carburant={position.carburant} />
+          <FuelBar carburant={position.carburant} data-testid="fuel-bar-fill" />
           <div style={squareStyle}>
             {boules.map((boule, index) => (
               <div key={`boule-${index}`} style={{ ...bouleStyle, top: `${boule.y * 10}px`, left: `${boule.x * 10}px`, transition: 'all 0.5s ease' }}></div>
@@ -343,3 +342,4 @@ function App() {
 }
 
 export default App;
+
