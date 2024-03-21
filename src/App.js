@@ -56,7 +56,7 @@ function App() {
 
   const [crashMessage, setCrashMessage] = useState('');
   
-
+const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
   const squareSize = 50;
   const squareEdge = Math.min(window.innerWidth, window.innerHeight) * (squareSize / 100);
 
@@ -83,7 +83,9 @@ function App() {
       const direction = keyMap[event.key];
       if (direction) {
         console.log(`Touche pressée: ${event.key}, Direction envoyée: ${direction}`);
-        const response = await fetch(`http://localhost:8080/voiture/deplacer/${direction}`, { method: 'POST' });
+        const response = await fetch(`${serverUrl}/voiture/deplacer/${direction}`, {
+          mode: 'no-cors',
+        method: 'POST' });
         const newPosition = await response.json();
         console.log(`Nouvelle position reçue:`, newPosition);
 
@@ -98,7 +100,7 @@ function App() {
 
         if (estProcheStation) {
           console.log('Proche d\'une station, envoi de la requête de rechargement...');
-          await fetch(`http://localhost:8080/voiture/recharger`, { method: 'POST' })
+          await fetch(`${serverUrl}/voiture/recharger`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
               console.log('Carburant rechargé:', data);
@@ -152,24 +154,41 @@ function App() {
     }, [boules, obstacles]);
 
     useEffect(() => {
-      const eventSource = new EventSource("http://localhost:8080/voiture");
+      console.log("Setting up EventSource...");
+      const eventSource = new EventSource("/voiture");
+    
+      eventSource.onopen = (event) => {
+        console.log("Connection to server opened.", event);
+      };
     
       eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("Data received from server:", data);
-        setPosition({
-          x: data.positionX,
-          y: data.positionY,
-          carburant: data.carburant,
-          direction: data.direction
-        });
-        setBoules(data.boules);
+        console.log("Event received:", event); // Log de l'événement reçu
+        try {
+          const data = JSON.parse(event.data);
+          console.log("Data received from server:", data); // Log des données reçues
+          setPosition({
+            x: data.positionX,
+            y: data.positionY,
+            carburant: data.carburant,
+            direction: data.direction
+          });
+          setBoules(data.boules);
+        } catch (error) {
+          console.error("Error parsing event data:", error);
+        }
+      };
+    
+      eventSource.onerror = (error) => {
+        console.error("EventSource error:", error);
       };
     
       return () => {
+        console.log("Closing EventSource...");
         eventSource.close();
       };
     }, []);
+
+  
     
 
   const startGame = () => {
@@ -180,7 +199,7 @@ function App() {
     setShowCrashPopup(false); // Cache le popup de crash
 
     try {
-      await fetch('http://localhost:8080/voiture/reinitialiser', { method: 'POST' });
+      await fetch('${serverUrl}/voiture/reinitialiser', { method: 'POST' });
     } catch (error) {
       console.error('Erreur lors de la réinitialisation du jeu:', error);
     }
@@ -343,3 +362,6 @@ function App() {
 
 export default App;
 
+
+
+    
