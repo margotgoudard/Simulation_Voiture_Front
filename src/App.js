@@ -155,7 +155,8 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
 
     useEffect(() => {
       console.log("Setting up EventSource...");
-      const eventSource = new EventSource("/voiture");
+      const eventSource = new EventSource("/voiture", 
+        { withCredentials: true });
     
       eventSource.onopen = (event) => {
         console.log("Connection to server opened.", event);
