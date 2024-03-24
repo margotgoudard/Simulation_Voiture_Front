@@ -1,16 +1,19 @@
-// Import React and testing utilities
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Import components and functions from your application
 import App, { FuelBar, generateRandomNumber, getRotationAngle } from './App';
 
 // TEST UNITAIRES 
 
 
-// Mock EventSource globally before any test runs
-beforeAll(() => {
+beforeEach(() => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({ newPosition: { positionX: 1, positionY: 1, carburant: 55 } }),
+    })
+  );
+
   global.EventSource = jest.fn(() => ({
     onmessage: jest.fn(),
     onerror: jest.fn(),
@@ -19,8 +22,6 @@ beforeAll(() => {
 });
 
 
-
-// Describe block for the FuelBar component tests
 describe('FuelBar Component', () => {
   test('renders correctly with initial fuel', () => {
     render(<FuelBar carburant={30} />);
@@ -51,25 +52,22 @@ describe('FuelBar Component', () => {
   });
 });
 
-// Single test block for FuelBar width adjustment
 test('FuelBar width adjusts correctly', () => {
   render(<FuelBar carburant={30} />);
   const fuelBarFill = screen.getByTestId('fuel-bar-fill');
   expect(fuelBarFill.style.width).toBe('50%');
 });
 
-// Describe block for the getRotationAngle function tests
 describe('getRotationAngle function', () => {
   test('returns correct angle for direction', () => {
     expect(getRotationAngle('h')).toBe('180deg');
     expect(getRotationAngle('b')).toBe('0deg');
     expect(getRotationAngle('g')).toBe('90deg');
     expect(getRotationAngle('d')).toBe('-90deg');
-    expect(getRotationAngle('')).toBe('0deg'); // Default case
+    expect(getRotationAngle('')).toBe('0deg');
   });
 });
 
-// Test block for the generateRandomNumber function
 test('generateRandomNumber returns a number within the expected range', () => {
   const max = 10;
   for (let i = 0; i < 100; i++) {
@@ -79,5 +77,27 @@ test('generateRandomNumber returns a number within the expected range', () => {
   }
 });
 
-// TESTS UI
 
+describe('Vehicle Movement and Fuel Consumption', () => {
+  test('Vehicle moves and consumes fuel on arrow key press', async () => {
+    render(<App />);
+    
+    const startButton = screen.getByText('Commencer à jouer');
+    fireEvent.click(startButton);
+    
+    const initialFuelBarFill = await screen.findByTestId('fuel-bar-fill');
+    
+    expect(initialFuelBarFill).toHaveStyle('width: 100%');
+    
+    fireEvent.keyDown(window, { key: 'ArrowRight', code: 'ArrowRight' });
+
+    await waitFor(() => {
+      const updatedFuelBarFill = screen.getByTestId('fuel-bar-fill');
+      
+      expect(updatedFuelBarFill.style.width).toBe('100%');
+    });
+
+    const vehicle = screen.getByTestId('voiture');
+    expect(vehicle.style.left).not.toBe('0px');
+  });
+});

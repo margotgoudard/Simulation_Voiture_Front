@@ -8,25 +8,22 @@ import boulesImage from './boules.png';
 
 
 export function FuelBar({ carburant }) {
-  // Calculez la largeur de la barre de carburant en pourcentage
   const fuelWidth = `${(carburant / 60) * 100}%`;
 
-  // Style pour le conteneur de la barre de carburant
   const fuelBarContainerStyle = {
-    width: '300px', // ou la largeur que vous souhaitez
-    height: '30px', // ou la hauteur que vous souhaitez
-    backgroundColor: 'grey', // Couleur de fond pour la partie non remplie
-    borderRadius: '15px', // Rayon pour les coins arrondis
+    width: '300px', 
+    height: '30px', 
+    backgroundColor: 'grey', 
+    borderRadius: '15px', 
     overflow: 'hidden',
   };
 
 
-  // Style pour la barre de carburant remplie
   const fuelBarFillStyle = {
     width: fuelWidth,
     height: '100%',
-    backgroundColor: 'orange', // Couleur de remplissage pour le carburant
-    transition: 'width 0.5s ease-in-out', // Transition pour animer le changement de carburant
+    backgroundColor: 'orange', 
+    transition: 'width 0.5s ease-in-out', 
   };
 
   return (
@@ -38,10 +35,10 @@ export function FuelBar({ carburant }) {
 
 export const getRotationAngle = (direction) => {
   switch (direction) {
-    case 'h': return '180deg'; // Haut
-    case 'b': return '0deg'; // Bas
-    case 'g': return '90deg'; // Gauche
-    case 'd': return '-90deg'; // Droite
+    case 'h': return '180deg'; 
+    case 'b': return '0deg'; 
+    case 'g': return '90deg'; 
+    case 'd': return '-90deg'; 
     default: return '0deg';
   }
 };
@@ -56,7 +53,7 @@ function App() {
 
   const [crashMessage, setCrashMessage] = useState('');
   
-const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
+const serverUrl = 'https://polytech3.home.lange.xyz'; 
   const squareSize = 50;
   const squareEdge = Math.min(window.innerWidth, window.innerHeight) * (squareSize / 100);
 
@@ -70,13 +67,13 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
     { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, { x: generateRandomNumber(Math.floor(squareEdge / 10)), y: generateRandomNumber(Math.floor(squareEdge / 10)) }, // Boule 1
   ]);
 
-  const [showStartPopup, setShowStartPopup] = useState(true); // État pour le popup de démarrage
+  const [showStartPopup, setShowStartPopup] = useState(true); 
   const [showCrashPopup, setShowCrashPopup] = useState(false); 
   
 
   useEffect(() => {
 
-    const squareEdgeInPositions = squareEdge / 10; // Convertir en unités de position
+    const squareEdgeInPositions = squareEdge / 10; 
 
     const handleKeyPress = async (event) => {
       const keyMap = { ArrowUp: 'h', ArrowDown: 'b', ArrowLeft: 'g', ArrowRight: 'd' };
@@ -123,21 +120,21 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
       console.log('Collision avec un obstacle!');
       setCrashMessage('Vous êtes rentré dans un obstacle!');
       setShowCrashPopup(true);
-      return; // Arrêtez la fonction ici pour éviter de définir la position après un crash
+      return; 
     }
 
     if (hitBoule) {
       console.log('Écrasé par une boule!');
       setCrashMessage('Vous vous êtes fait écraser!');
       setShowCrashPopup(true);
-      return; // Arrêtez la fonction ici pour éviter de définir la position après un crash
+      return; 
     }
 
     if (newPosition.carburant <= 0) {
       console.log('Plus d\'essence!');
       setCrashMessage('Vous n\'avez plus d\'essence!');
       setShowCrashPopup(true);
-      return; // Arrêtez la fonction ici pour éviter de définir la position après un crash
+      return; 
     }
 
         setPosition({
@@ -163,10 +160,10 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
       };
     
       eventSource.onmessage = (event) => {
-        console.log("Event received:", event); // Log de l'événement reçu
+        console.log("Event received:", event); 
         try {
           const data = JSON.parse(event.data);
-          console.log("Data received from server:", data); // Log des données reçues
+          console.log("Data received from server:", data);
           setPosition({
             x: data.positionX,
             y: data.positionY,
@@ -193,19 +190,18 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
     
 
   const startGame = () => {
-    setShowStartPopup(false); // Cache le popup de démarrage
+    setShowStartPopup(false); 
   };
 
   const restartGame = async () => {
-    setShowCrashPopup(false); // Cache le popup de crash
+    setShowCrashPopup(false); 
 
     try {
       await fetch('${serverUrl}/voiture/reinitialiser', { method: 'POST' });
     } catch (error) {
       console.error('Erreur lors de la réinitialisation du jeu:', error);
     }
-  
-    // Réinitialiser les positions de départ et le carburant
+
     setPosition({
       x: centerX,
       y: centerY,
@@ -213,20 +209,17 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
       carburant: 60
     });
   
-    // Réinitialiser les positions des stations
     setStations([...Array(4)].map(() => ({
       x: generateRandomNumber(Math.floor(squareEdge / 10)),
       y: generateRandomNumber(Math.floor(squareEdge / 10))
     })));
   
-    // Réinitialiser les positions des obstacles
     setObstacles([...Array(10)].map(() => ({
       x: generateRandomNumber(Math.floor(squareEdge / 10)),
       y: generateRandomNumber(Math.floor(squareEdge / 10))
     })));
   
-    // Réinitialiser les positions des boules
-    setBoules([...Array(2)].map(() => ({ // Supposons que vous avez 2 boules, ajustez selon le nombre réel
+    setBoules([...Array(2)].map(() => ({ 
       x: generateRandomNumber(Math.floor(squareEdge / 10)),
       y: generateRandomNumber(Math.floor(squareEdge / 10))
     })));
@@ -273,17 +266,17 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
         },
       },
     
-      animation: 'pulse 2s infinite ease-in-out', // Appliquer l'animation d'ombre pulsante
+      animation: 'pulse 2s infinite ease-in-out', 
     
   };
 
   const voitureStyle = {
-  backgroundImage: `url(${voitureImage})`,// Chemin de votre image
-   backgroundSize: '50% 50%', // Couvrir l'ensemble de la div
+  backgroundImage: `url(${voitureImage})`,
+   backgroundSize: '50% 50%',
    backgroundRepeat: 'no-repeat',
 
-    backgroundPosition: 'center', // Centrer l'image dans la div
-    width: '50px', // Ajustez selon la taille de votre image
+    backgroundPosition: 'center',
+    width: '50px', 
     height: '50px',
     position: 'absolute',
     top: `${position.y * 10}px`,
@@ -293,33 +286,33 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
   };
 
   const stationStyle = {
-    backgroundImage: `url(${stationImage})`, // Utilisez l'image de station importée
-    backgroundSize: 'contain', // Cela assure que l'image s'adapte à la taille de la div sans être déformée
+    backgroundImage: `url(${stationImage})`, 
+    backgroundSize: 'contain', 
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
-    width: '30px', // Définissez la taille que vous souhaitez pour les images de station
+    width: '30px',
     height: '30px',
     position: 'absolute',
     transition: 'all 0.5s ease',
   };
 
   const obstacleStyle = {
-    backgroundImage: `url(${obstaclesImage})`, // Utilisez l'image de station importée
-    backgroundSize: 'contain', // Cela assure que l'image s'adapte à la taille de la div sans être déformée
+    backgroundImage: `url(${obstaclesImage})`, 
+    backgroundSize: 'contain', 
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
-    width: '30px', // Définissez la taille que vous souhaitez pour les images de station
+    width: '30px',
     height: '30px',
     position: 'absolute',
     transition: 'all 0.5s ease',
   };
 
   const bouleStyle = {
-    backgroundImage: `url(${boulesImage})`, // Utilisez l'image de station importée
-    backgroundSize: 'contain', // Cela assure que l'image s'adapte à la taille de la div sans être déformée
+    backgroundImage: `url(${boulesImage})`, 
+    backgroundSize: 'contain', 
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
-    width: '30px', // Définissez la taille que vous souhaitez pour les images de station
+    width: '30px', 
     height: '30px',
     position: 'absolute',
     transition: 'all 0.5s ease',
@@ -335,7 +328,7 @@ const serverUrl = 'https://polytech3.home.lange.xyz'; // URL du serveur
 
     {showCrashPopup && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
-          <p>{crashMessage}</p> {/* Ajouté pour afficher le message de crash */}
+          <p>{crashMessage}</p> {}
           <button onClick={restartGame}>Recommencer</button>
         </div>
       )}
