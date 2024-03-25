@@ -101,3 +101,39 @@ describe('Vehicle Movement and Fuel Consumption', () => {
     expect(vehicle.style.left).not.toBe('0px');
   });
 });
+
+describe('User Journey: Starting and Playing the Game', () => {
+  test('User starts the game, moves the vehicle, and recharges fuel', async () => {
+    render(<App />);
+    
+    // L'utilisateur voit le bouton pour commencer à jouer et clique dessus
+    const startButton = screen.getByRole('button', { name: /commencer à jouer/i });
+    fireEvent.click(startButton);
+
+    // Attendre que le bouton de démarrage disparaisse, indiquant que le jeu a commencé
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /commencer à jouer/i })).not.toBeInTheDocument();
+    });
+
+    // Simuler l'appui sur la touche droite pour déplacer la voiture
+    fireEvent.keyDown(window, { key: 'ArrowRight', code: 'ArrowRight' });
+
+    // Attendre que le carburant soit consommé et vérifier que la barre de carburant a diminué
+    await waitFor(() => {
+      const fuelBarFill = screen.getByTestId('fuel-bar-fill');
+      expect(fuelBarFill).not.toHaveStyle('width: 100%');
+    }, { timeout: 3000 }); // Augmenter le délai si nécessaire pour permettre l'animation
+
+    // Supposons que le véhicule approche d'une station et se recharge
+    // NOTE: Ce scénario nécessite que le mock de fetch dans le beforeEach gère la rechargement
+    await waitFor(() => {
+      const fuelBarFill = screen.getByTestId('fuel-bar-fill');
+      expect(fuelBarFill).toHaveStyle('width: 100%');
+    });
+
+    // Vérifier que le message de crash n'est pas affiché, indiquant que le joueur n'a pas rencontré d'obstacle
+    expect(screen.queryByText(/Vous êtes rentré dans un obstacle!/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vous vous êtes fait écraser!/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vous n'avez plus d'essence!/i)).not.toBeInTheDocument();
+  });
+});
